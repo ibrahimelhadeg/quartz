@@ -1,3 +1,108 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// ---------------------------------------------------------------------------
+// E1 — clickable banner-fold styling
+//
+// The dotfiles corpus folds sections with raw HTML:
+//   <details><summary><h2 id="...">Title</h2></summary> … </details>
+// (the <summary> wraps a block-level heading). Native <details>/<summary> is
+// already clickable, but the default disclosure marker misaligns against a
+// block heading and the banner doesn't read as an obvious toggle.
+//
+// Scope: only heading-fold <details> inside an article. Quartz callouts use
+// the `.callout` class with a `.callout-title` (no native <summary>), so we
+// also exclude `details.callout` defensively to guarantee callout collapse
+// behaviour in `callouts.scss` is never regressed.
+// ---------------------------------------------------------------------------
+
+article details:not(.callout) {
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  margin: 1rem 0;
+  overflow: hidden;
+  background-color: var(--light);
+
+  // The banner: the whole summary row is the toggle, not just the text.
+  & > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    list-style: none; // remove default disclosure triangle (Firefox/standards)
+    background-color: var(--lightgray);
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+
+    // remove default disclosure triangle (WebKit/Blink)
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // properly-aligned chevron indicator that reflects open/closed state
+    &::after {
+      content: "";
+      flex: 0 0 0.65em;
+      width: 0.65em;
+      height: 0.65em;
+      margin-left: auto;
+      background-color: var(--darkgray);
+      mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpolyline points="6 9 12 15 18 9"%3E%3C/polyline%3E%3C/svg%3E');
+      mask-size: contain;
+      mask-position: center;
+      mask-repeat: no-repeat;
+      transform: rotate(-90deg); // collapsed: chevron points right
+      transition: transform 0.15s ease;
+    }
+
+    // hover / active affordance for the full banner
+    &:hover {
+      background-color: var(--gray);
+      color: var(--light);
+
+      &::after {
+        background-color: var(--light);
+      }
+    }
+
+    &:active {
+      background-color: var(--darkgray);
+    }
+
+    // the wrapped heading should sit flush inside the banner, not carry its
+    // own large block margins (base.scss gives h2/h3 top+bottom margins)
+    & > :first-child {
+      margin: 0;
+    }
+
+    & > h1,
+    & > h2,
+    & > h3,
+    & > h4,
+    & > h5,
+    & > h6 {
+      margin: 0;
+      // let the banner background show through; keep the anchor link tidy
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
+  // open state: chevron points down, banner separated from body
+  &[open] > summary {
+    border-bottom: 1px solid var(--lightgray);
+
+    &::after {
+      transform: rotate(0deg);
+    }
+  }
+
+  // body padding so folded content isn't flush against the banner/border
+  & > :not(summary) {
+    padding: 0 1rem;
+  }
+}
