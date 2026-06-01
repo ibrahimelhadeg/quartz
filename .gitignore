@@ -11,3 +11,9 @@ private/
 replit.nix
 .quartz/
 quartz/cli/tui/dist/
+
+# Local pnpm setup byproducts. npm is the fork's canonical package
+# manager (loader calls npm; package-lock.json is tracked); these are
+# never versioned upstream.
+pnpm-lock.yaml
+pnpm-workspace.yaml
