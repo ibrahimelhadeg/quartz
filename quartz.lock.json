@@ -140,10 +140,10 @@
       "installedAt": "2026-05-24T15:36:17.005Z"
     },
     "graph": {
-      "source": "github:quartz-community/graph",
-      "resolved": "https://github.com/quartz-community/graph.git",
-      "commit": "67ac4993907618a0ea5bd33726f792c572cddbad",
-      "installedAt": "2026-05-26T17:45:56.210Z"
+      "source": "./plugins/graph",
+      "resolved": "/Users/ibrahim/Projects/vendor/forks/quartz/plugins/graph",
+      "commit": "local",
+      "installedAt": "2026-06-01T06:38:17.791Z"
     },
     "hard-line-breaks": {
       "source": "github:quartz-community/hard-line-breaks",

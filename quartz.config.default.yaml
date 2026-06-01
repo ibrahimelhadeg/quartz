@@ -134,8 +134,19 @@ plugins:
     layout:
       position: left
       priority: 50
-  - source: github:quartz-community/graph
+  - source: ./plugins/graph
     enabled: true
+    options:
+      localGraph:
+        # Readability (E4): pin labels visible without hover/zoom + raise
+        # font/fade so titles read at rest. focusOnHover already off upstream.
+        showLabels: true
+        fontSize: 0.7
+        opacityScale: 2
+        scale: 1.2
+        # Relationship-kind encoding (E4): colour + arrow per edge kind, with
+        # a corner legend so the encoding is discoverable from the page.
+        legend: true
     layout:
       position: right
       priority: 10

@@ -29,7 +29,8 @@ two-view spec model (no README §3 / openspec governance applies here).
 | --- | --- | --- |
 | Clickable banner-fold CSS (E1) | `quartz/styles/custom.scss` | planned (not yet built) |
 | PlantUML transformer (E3) | `./plugins/plantuml` | built |
-| Graph fork — labels + edges + named clusters (E4/E5) | `./plugins/graph` | planned (not yet built) |
+| Graph fork — local-graph readable labels + relationship-kind edges (E4) | `./plugins/graph` | built |
+| Graph fork — global-graph named clusters (E5) | `./plugins/graph` | planned (not yet built) |
 | Glob `dot:true` patch to discover hidden `.claude/` (re-home into a local plugin) | `./plugins/graph` (local plugin) | planned (not yet built) |
 
 ## Journeys
