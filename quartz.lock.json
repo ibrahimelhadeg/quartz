@@ -199,6 +199,12 @@
       "commit": "a53cf02ce7faca400bcf3cfeed47eb860329e534",
       "installedAt": "2026-05-24T15:36:16.998Z"
     },
+    "plantuml": {
+      "source": "./plugins/plantuml",
+      "resolved": "/Users/ibrahim/Projects/vendor/forks/quartz/plugins/plantuml",
+      "commit": "local",
+      "installedAt": "2026-06-01T06:10:44.298Z"
+    },
     "quartz-themes": {
       "source": {
         "name": "quartz-themes",

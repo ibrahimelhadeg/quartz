@@ -1,0 +1,59 @@
+{
+  "name": "@quartz-fork/plantuml",
+  "version": "1.0.0",
+  "description": "Render fenced ```plantuml code blocks to inline SVG at build time via the local plantuml CLI (no server, no network).",
+  "type": "module",
+  "license": "MIT",
+  "author": "ibrahimelhadeg",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "node ./build.mjs"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^24.10.0",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "quartz": {
+    "name": "plantuml",
+    "displayName": "PlantUML",
+    "category": "transformer",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "requiresInstall": false,
+    "dependencies": [],
+    "defaultOrder": 15,
+    "defaultEnabled": true,
+    "defaultOptions": {
+      "command": "plantuml",
+      "cache": true
+    },
+    "optionSchema": {
+      "command": {
+        "type": "string"
+      },
+      "cacheDir": {
+        "type": "string"
+      },
+      "cache": {
+        "type": "boolean"
+      }
+    }
+  }
+}

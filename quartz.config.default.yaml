@@ -50,6 +50,12 @@ plugins:
         - git
         - filesystem
     order: 10
+  - source: ./plugins/plantuml
+    enabled: true
+    options:
+      command: /opt/homebrew/bin/plantuml
+      cache: true
+    order: 15
   - source: github:quartz-community/syntax-highlighting
     enabled: true
     options:
