@@ -99,7 +99,7 @@ const componentDts = [
   "  drag: boolean; zoom: boolean; depth: number; scale: number;",
   "  repelForce: number; centerForce: number; linkDistance: number;",
   "  fontSize: number; opacityScale: number; removeTags: string[]; showTags: boolean;",
-  "  focusOnHover?: boolean; enableRadial?: boolean; showLabels?: boolean; legend?: boolean;",
+  "  focusOnHover?: boolean; enableRadial?: boolean; showLabels?: boolean; legend?: boolean; clusters?: boolean;",
   "}",
   "export interface GraphOptions {",
   "  localGraph?: Partial<D3Config>;",

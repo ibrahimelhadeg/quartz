@@ -114,6 +114,10 @@ import {
       // Fork additions (local graph): always-visible labels + relationship-kind edges + legend.
       var showLabels = config.showLabels === true;
       var showLegend = config.legend === true;
+      // Fork addition (global graph, E5): group nodes into named, colour-coded
+      // clusters derived from the ontology (tags) with folder prefix as fallback,
+      // and render each cluster's name as a region label at its centroid.
+      var enableClusters = config.clusters === true;
 
       var data;
       try {
@@ -249,6 +253,105 @@ import {
       var light = resolveColor(styles.getPropertyValue("--light").trim(), "#f5f5f5");
       var bodyFont = styles.getPropertyValue("--bodyFont").trim() || "inherit";
 
+      // ---- Named clusters (global graph, E5) ----------------------------------
+      // Derive each node's cluster from the ontology (tags) with folder prefix as
+      // the fallback, assign a stable colour per cluster, and (later) draw the
+      // cluster name as a region label at its centroid.
+      //
+      // Cluster derivation is precedence-ordered:
+      //   1. ontology  — a node tag that names a known cluster wins (e.g. tags:
+      //      [spec] -> "specs"). The emitted ContentIndex carries `tags` but not
+      //      frontmatter `type:`, so tags are the available ontology signal.
+      //   2. folder    — top-level slug prefix maps to a cluster (the path that
+      //      matters today, since the corpus is mostly untagged).
+      //   3. core      — root-level docs (README/AGENTS/CLAUDE/ONBOARDING/index).
+      //
+      // Tag pages (tags/*) form their own "tags" cluster.
+      var clusterNames = [
+        "specs",
+        "tools",
+        "agents",
+        "plans",
+        "skills",
+        "rules",
+        "setup",
+        "claude",
+        "core",
+        "tags",
+      ];
+      // Map a recognised ontology tag to its cluster. A tag whose (singular or
+      // plural) form names a cluster takes precedence over the folder fallback.
+      var tagToCluster = {
+        spec: "specs",
+        specs: "specs",
+        tool: "tools",
+        tools: "tools",
+        agent: "agents",
+        agents: "agents",
+        plan: "plans",
+        plans: "plans",
+        skill: "skills",
+        skills: "skills",
+        rule: "rules",
+        rules: "rules",
+        setup: "setup",
+        claude: "claude",
+        core: "core",
+      };
+
+      function clusterFromFolder(id) {
+        if (id.startsWith("tags/")) return "tags";
+        if (id.indexOf("openspec/") === 0) return "specs";
+        if (id.indexOf("setup/tools/") === 0) return "tools";
+        if (id.indexOf("setup/agents/") === 0) return "agents";
+        if (id.indexOf("setup/plans/") === 0) return "plans";
+        if (id.indexOf("setup/") === 0) return "setup";
+        if (id.indexOf(".claude/skills/") === 0) return "skills";
+        if (id.indexOf(".claude/") === 0) return "claude";
+        if (id.indexOf("rules/") === 0) return "rules";
+        // No top-level folder segment -> a root-level document.
+        if (id.indexOf("/") === -1) return "core";
+        return "setup";
+      }
+
+      function clusterForNode(node) {
+        var tags = node.tags || [];
+        for (var ti = 0; ti < tags.length; ti++) {
+          var key = String(tags[ti]).toLowerCase();
+          if (tagToCluster[key]) return tagToCluster[key];
+        }
+        return clusterFromFolder(node.id);
+      }
+
+      // Fixed, ordered palette keyed by cluster name (index into clusterNames).
+      // Distinct hues chosen for separability on both light and dark backgrounds;
+      // resolved through resolveColor so PixiJS gets a parseable value.
+      var clusterPalette = {
+        specs: "#7c6ff0", // indigo
+        tools: "#2bb3a3", // teal
+        agents: "#e8913a", // amber
+        plans: "#d6588a", // magenta-rose
+        skills: "#3a8fe8", // blue
+        rules: "#c25b5b", // brick
+        setup: "#5fae5f", // green
+        claude: "#a07cd6", // violet
+        core: "#d4b13a", // gold
+        tags: "#8a8a8a", // gray (tag pages)
+      };
+      var clusterColors = {};
+      for (var ci = 0; ci < clusterNames.length; ci++) {
+        var cn = clusterNames[ci];
+        clusterColors[cn] = resolveColor(clusterPalette[cn], clusterPalette[cn]);
+      }
+
+      // Tag each node with its cluster and track which clusters are present.
+      var presentClusters = {};
+      for (var ni = 0; ni < nodes.length; ni++) {
+        var cluster = clusterForNode(nodes[ni]);
+        nodes[ni].cluster = cluster;
+        presentClusters[cluster] = true;
+      }
+
       // Relationship-kind edge palette. Outgoing/incoming take theme accents so they
       // track light/dark; tag co-membership reuses the tag accent (secondary).
       var linkColors = {
@@ -298,17 +401,72 @@ import {
             .iterations(3),
         );
 
-      if (enableRadial) {
+      // Cluster anchors (E5): place each present cluster on a ring around the
+      // centre and pull its members toward that anchor so the regions separate.
+      var clusterAnchors = {};
+      if (enableClusters) {
+        var present = [];
+        for (var pi = 0; pi < clusterNames.length; pi++) {
+          if (presentClusters[clusterNames[pi]]) present.push(clusterNames[pi]);
+        }
+        var anchorRadius = (Math.min(width, height) / 2) * 0.7;
+        for (var ai = 0; ai < present.length; ai++) {
+          var ang = (2 * Math.PI * ai) / Math.max(present.length, 1) - Math.PI / 2;
+          clusterAnchors[present[ai]] = {
+            x: Math.cos(ang) * anchorRadius,
+            y: Math.sin(ang) * anchorRadius,
+          };
+        }
+        // Custom positioning force: ease each node toward its cluster anchor.
+        var clusterStrength = 0.12;
+        var clusterForce = function (alpha) {
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            var anchor = clusterAnchors[n.cluster];
+            if (!anchor) continue;
+            n.vx += (anchor.x - n.x) * clusterStrength * alpha;
+            n.vy += (anchor.y - n.y) * clusterStrength * alpha;
+          }
+        };
+        simulation.force("cluster", clusterForce);
+      } else if (enableRadial) {
         var radius = (Math.min(width, height) / 2) * 0.8;
         simulation.force("radial", d3.forceRadial(radius).strength(0.2));
       }
 
+      // Cluster region labels sit BEHIND links/nodes so they read like the
+      // labelled regions on a map (large, semi-transparent, in cluster colour).
+      var clusterLabelsContainer = new PIXI.Container();
       var linkContainer = new PIXI.Container();
       var nodesContainer = new PIXI.Container();
       var labelsContainer = new PIXI.Container();
+      stage.addChild(clusterLabelsContainer);
       stage.addChild(linkContainer);
       stage.addChild(nodesContainer);
       stage.addChild(labelsContainer);
+
+      // One text element per present cluster, positioned at its centroid each tick.
+      var clusterLabelData = [];
+      if (enableClusters) {
+        for (var cli = 0; cli < clusterNames.length; cli++) {
+          var cname = clusterNames[cli];
+          if (!presentClusters[cname]) continue;
+          var clabel = new PIXI.Text({
+            text: cname,
+            style: {
+              fontSize: fontSize * 40,
+              fill: clusterColors[cname] || gray,
+              fontFamily: bodyFont,
+              fontWeight: "700",
+            },
+            resolution: window.devicePixelRatio * 2,
+          });
+          clabel.anchor.set(0.5, 0.5);
+          clabel.alpha = 0.28;
+          clusterLabelsContainer.addChild(clabel);
+          clusterLabelData.push({ cluster: cname, label: clabel });
+        }
+      }
 
       var nodeRenderData = [];
       var linkRenderData = [];
@@ -329,6 +487,12 @@ import {
       }
 
       function nodeColor(d) {
+        // Global graph (E5): fill by cluster so each region reads as a coloured
+        // area. The current page still gets the accent so it stands out.
+        if (enableClusters) {
+          if (d.id === slug) return secondary;
+          return clusterColors[d.cluster] || gray;
+        }
         var isCurrent = d.id === slug;
         if (isCurrent) {
           return secondary;
@@ -451,8 +615,10 @@ import {
 
         var gfx = new PIXI.Graphics();
         gfx.circle(0, 0, radius);
-        gfx.fill({ color: isTagNode ? light : color });
-        if (isTagNode) {
+        // In cluster mode every node (tags included) takes its cluster fill so
+        // the regions read uniformly; otherwise keep the local-graph styling.
+        gfx.fill({ color: enableClusters ? color : isTagNode ? light : color });
+        if (isTagNode && !enableClusters) {
           gfx.stroke({ width: 2, color: tertiary });
         }
 
@@ -629,6 +795,33 @@ import {
             n.gfx.position.set(x + width / 2, y + height / 2);
             if (n.label) {
               n.label.position.set(x + width / 2, y + height / 2);
+            }
+          }
+        }
+
+        // Re-centre each cluster region label on the live centroid of its nodes.
+        if (clusterLabelData.length > 0) {
+          var sums = {};
+          for (var ci2 = 0; ci2 < clusterLabelData.length; ci2++) {
+            sums[clusterLabelData[ci2].cluster] = { x: 0, y: 0, n: 0 };
+          }
+          for (var i = 0; i < nodes.length; i++) {
+            var nd = nodes[i];
+            var acc = sums[nd.cluster];
+            if (acc && nd.x != null && nd.y != null) {
+              acc.x += nd.x;
+              acc.y += nd.y;
+              acc.n++;
+            }
+          }
+          for (var ci2 = 0; ci2 < clusterLabelData.length; ci2++) {
+            var entry = clusterLabelData[ci2];
+            var acc2 = sums[entry.cluster];
+            if (acc2 && acc2.n > 0) {
+              entry.label.position.set(acc2.x / acc2.n + width / 2, acc2.y / acc2.n + height / 2);
+              entry.label.visible = true;
+            } else {
+              entry.label.visible = false;
             }
           }
         }

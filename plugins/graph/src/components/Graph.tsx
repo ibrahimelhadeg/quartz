@@ -27,6 +27,8 @@ export interface D3Config {
   showLabels?: boolean;
   /** Fork: render the relationship-kind legend in the panel corner (local graph). */
   legend?: boolean;
+  /** Fork: group nodes into named, colour-coded clusters (global graph, E5). */
+  clusters?: boolean;
 }
 
 export interface GraphOptions {
@@ -66,6 +68,7 @@ const defaultOptions: GraphOptions = {
     removeTags: [],
     focusOnHover: true,
     enableRadial: true,
+    clusters: true,
   },
 };
 
@@ -114,7 +117,14 @@ export default ((userOpts?: Partial<GraphOptions>) => {
           </button>
         </div>
         <div class="global-graph-outer">
-          <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
+          <div
+            class={classNames(
+              undefined,
+              "global-graph-container",
+              globalGraph.clusters ? "global-graph-clustered" : undefined,
+            )}
+            data-cfg={JSON.stringify(globalGraph)}
+          ></div>
         </div>
       </div>
     );

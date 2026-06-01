@@ -75,6 +75,14 @@
   height: 100%;
 }
 
+// Named-cluster global graph (Plugin Author fork, E5). The clustering itself is
+// drawn on the PixiJS canvas (cluster-colour node fills + centroid region
+// labels in graph.inline.ts); this class marks the container so the feature is
+// discoverable from the emitted markup and available for future styling hooks.
+.global-graph-clustered {
+  // canvas-rendered; marker class only
+}
+
 // Relationship-kind legend for the local graph (Plugin Author fork, E4).
 // Swatch colours mirror linkColors in graph.inline.ts so the encoding is
 // discoverable from the page without hover or external docs.
