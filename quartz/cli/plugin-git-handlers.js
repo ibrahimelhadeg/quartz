@@ -800,13 +800,16 @@ export async function handlePluginInstallUnified({
 
       if (entry.commit === "local") {
         try {
-          if (!fs.existsSync(entry.resolved)) {
-            console.log(styleText("red", `  ✗ ${name}: local path missing: ${entry.resolved}`))
+          const localPath = entry.source
+            ? parseGitSource(entry.source).url
+            : path.resolve(entry.resolved)
+          if (!fs.existsSync(localPath)) {
+            console.log(styleText("red", `  ✗ ${name}: local path missing: ${localPath}`))
             failed++
             continue
           }
           fs.mkdirSync(path.dirname(pluginDir), { recursive: true })
-          symlinkOrCopySync(entry.resolved, pluginDir)
+          symlinkOrCopySync(localPath, pluginDir)
           console.log(styleText("green", `✓ ${name} restored (local symlink)`))
           restoredPlugins.push({ name, pluginDir })
           installed++
@@ -1025,9 +1028,15 @@ export async function handlePluginInstallUnified({
 
     if (entry.commit === "local") {
       try {
+        // Derive the canonical local path from the portable `source` field so
+        // that baked absolute paths in `resolved` (written at install time on
+        // another machine) do not cause breakage on this machine.
+        const localPath = entry.source
+          ? parseGitSource(entry.source).url
+          : path.resolve(entry.resolved)
         if (fs.existsSync(pluginDir)) {
           const stat = fs.lstatSync(pluginDir)
-          if (stat.isSymbolicLink() && fs.readlinkSync(pluginDir) === entry.resolved) {
+          if (stat.isSymbolicLink() && fs.readlinkSync(pluginDir) === localPath) {
             console.log(styleText("gray", `  ✓ ${name} (local) already linked`))
             installed++
             continue
@@ -1035,13 +1044,13 @@ export async function handlePluginInstallUnified({
           if (stat.isSymbolicLink()) fs.unlinkSync(pluginDir)
           else fs.rmSync(pluginDir, { recursive: true })
         }
-        if (!fs.existsSync(entry.resolved)) {
-          console.log(styleText("red", `  ✗ ${name}: local path missing: ${entry.resolved}`))
+        if (!fs.existsSync(localPath)) {
+          console.log(styleText("red", `  ✗ ${name}: local path missing: ${localPath}`))
           failed++
           continue
         }
         fs.mkdirSync(path.dirname(pluginDir), { recursive: true })
-        symlinkOrCopySync(entry.resolved, pluginDir)
+        symlinkOrCopySync(localPath, pluginDir)
         console.log(styleText("green", `  ✓ ${name} (local) linked`))
         pluginsToBuild.push({ name, pluginDir })
         installed++
