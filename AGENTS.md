@@ -31,7 +31,7 @@ two-view spec model (no README §3 / openspec governance applies here).
 | PlantUML transformer (E3) | `./plugins/plantuml` | built |
 | Graph fork — local-graph readable labels + relationship-kind edges (E4) | `./plugins/graph` | built |
 | Graph fork — global-graph named clusters (E5) | `./plugins/graph` | built |
-| Glob `dot:true` patch to discover hidden `.claude/` (re-home into a local plugin) | `./plugins/graph` (local plugin) | planned (not yet built) |
+| Glob `dot:true` patch to discover hidden `.claude/` | `quartz/util/glob.ts` (core helper; no plugin discovery hook exists) | built |
 
 ## Journeys
 
