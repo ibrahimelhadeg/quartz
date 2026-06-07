@@ -106,3 +106,31 @@ article details:not(.callout) {
     padding: 0 1rem;
   }
 }
+
+// ---------------------------------------------------------------------------
+// E6 — PlantUML diagram responsive sizing
+//
+// The E3 transformer inlines `<svg data-diagram-type=…>` with hard-coded pixel
+// width/height inside `<figure class="plantuml-diagram">`. Left unconstrained
+// these render at natural size and overflow the article column (observed widths
+// 664px–8471px, the latter the §3 component diagram).
+//
+// Scaling every diagram down to column width would crush the very wide ones to
+// an illegible scale. Instead the figure is a horizontal scroll container:
+// diagrams narrower than the column fit as-is, while over-wide ones keep a
+// readable size and scroll horizontally inside the figure — so the page itself
+// never overflows. `data-diagram-type` is carried only by PlantUML diagram SVGs
+// (icon/graph SVGs lack it), so the selector is exact.
+// ---------------------------------------------------------------------------
+
+article figure.plantuml-diagram {
+  max-width: 100%;
+  margin: 1rem 0; // reset the browser's default 40px figure inline margin
+  overflow-x: auto; // over-wide diagrams scroll; narrower ones simply fit
+}
+
+article svg[data-diagram-type] {
+  // Drop the inline pixel height so the viewBox keeps the aspect ratio; the
+  // natural width is preserved so the figure (not the page) absorbs the scroll.
+  height: auto !important;
+}
