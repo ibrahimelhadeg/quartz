@@ -1,13 +1,16 @@
 # yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
 configuration:
-  pageTitle: Quartz 5
+  # FORK CUSTOMIZATION (rebase-survivable): dotfiles site identity. The
+  # v4 overlay's pageTitle was lost in the v5 migration; restore it here.
+  pageTitle: dotfiles
   pageTitleSuffix: ""
   enableSPA: true
   enablePopovers: true
-  analytics:
-    provider: plausible
+  # FORK CUSTOMIZATION (rebase-survivable): dotfiles site identity (v4
+  # overlay parity) — no phone-home, undeployed local baseUrl.
+  analytics: null
   locale: en-US
-  baseUrl: quartz.jzhao.xyz
+  baseUrl: localhost:8080
   ignorePatterns:
     - private
     - templates
