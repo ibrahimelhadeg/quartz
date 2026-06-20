@@ -17,3 +17,4 @@ quartz/cli/tui/dist/
 # never versioned upstream.
 pnpm-lock.yaml
 pnpm-workspace.yaml
+quartz.config.yaml
