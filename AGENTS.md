@@ -32,6 +32,7 @@ two-view spec model (no README §3 / openspec governance applies here).
 | Graph fork — local-graph readable labels + relationship-kind edges (E4) | `./plugins/graph` | built |
 | Graph fork — global-graph named clusters (E5) | `./plugins/graph` | built |
 | Glob `dot:true` patch to discover hidden `.claude/` | `quartz/util/glob.ts` (core helper; no plugin discovery hook exists) | built |
+| Dot-dir + relative link resolution patch — `_addRelativeToStart` dot-segment fix, `canonicalSlug` relative-prefix strip, source-dir-first candidate resolution (E7) | `patches/@quartz-community+utils+0.1.0.patch` via `patch-package` postinstall; plugin-local copies re-patched + `dist/` re-bundled on plugin install | built |
 | PlantUML diagram responsive sizing — figure scroll container (E6) | `quartz/styles/custom.scss` | built |
 
 **Configuration is consumer-owned.** The fork ships a GENERIC
