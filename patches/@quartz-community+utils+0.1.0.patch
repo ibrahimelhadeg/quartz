@@ -1,8 +1,8 @@
 diff --git a/node_modules/@quartz-community/utils/dist/index.js b/node_modules/@quartz-community/utils/dist/index.js
-index 0860e9a..91cde5c 100644
+index 0860e9a..f8f9bd0 100644
 --- a/node_modules/@quartz-community/utils/dist/index.js
 +++ b/node_modules/@quartz-community/utils/dist/index.js
-@@ -184,8 +184,15 @@ function transformLink(src, target, opts) {
+@@ -184,8 +184,30 @@ function transformLink(src, target, opts) {
      const effectiveSrc =
        !endsWith(src, "index") && opts.allSlugs.includes(`${src}/index`) ? `${src}/index` : src;
      const folderTail = isFolderPath(targetSlug) ? "/" : "";
@@ -15,11 +15,26 @@ index 0860e9a..91cde5c 100644
 +      if (opts.allSlugs.includes(_cand)) {
 +        return resolveRelative(effectiveSrc, _cand) + targetAnchor;
 +      }
++      const [_rawT, _rawA] = splitAnchor(decodeURI(target));
++      if (_rawT && !_rawT.startsWith("/") && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(_rawT)) {
++        const _p = decodeURIComponent(new URL(_rawT, "https://b/" + effectiveSrc).pathname);
++        const _candExt = stripSlashes(slugifyPath(_p));
++        if (opts.allSlugs.includes(_candExt)) {
++          return resolveRelative(effectiveSrc, _candExt) + _rawA;
++        }
++      }
++      if (
++        isFolderPath(targetSlug) &&
++        (opts.allSlugs.includes(_cand + "/index") ||
++          opts.allSlugs.some((s) => s.startsWith(_cand + "/")))
++      ) {
++        return joinSegments(pathToRoot(effectiveSrc), _cand) + "/" + targetAnchor;
++      }
 +    }
      if (opts.strategy === "shortest") {
        const isMultiSegment = targetCanonical.includes("/");
        const isFolderTarget = isFolderPath(targetSlug);
-@@ -261,7 +268,7 @@ function _addRelativeToStart(s) {
+@@ -261,7 +283,7 @@ function _addRelativeToStart(s) {
    if (s === "") {
      s = ".";
    }
@@ -29,10 +44,10 @@ index 0860e9a..91cde5c 100644
    }
    return s;
 diff --git a/node_modules/@quartz-community/utils/dist/path.js b/node_modules/@quartz-community/utils/dist/path.js
-index de5f7e3..8202c21 100644
+index de5f7e3..9bf85da 100644
 --- a/node_modules/@quartz-community/utils/dist/path.js
 +++ b/node_modules/@quartz-community/utils/dist/path.js
-@@ -181,8 +181,15 @@ function transformLink(src, target, opts) {
+@@ -181,8 +181,30 @@ function transformLink(src, target, opts) {
      const effectiveSrc =
        !endsWith(src, "index") && opts.allSlugs.includes(`${src}/index`) ? `${src}/index` : src;
      const folderTail = isFolderPath(targetSlug) ? "/" : "";
@@ -45,11 +60,26 @@ index de5f7e3..8202c21 100644
 +      if (opts.allSlugs.includes(_cand)) {
 +        return resolveRelative(effectiveSrc, _cand) + targetAnchor;
 +      }
++      const [_rawT, _rawA] = splitAnchor(decodeURI(target));
++      if (_rawT && !_rawT.startsWith("/") && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(_rawT)) {
++        const _p = decodeURIComponent(new URL(_rawT, "https://b/" + effectiveSrc).pathname);
++        const _candExt = stripSlashes(slugifyPath(_p));
++        if (opts.allSlugs.includes(_candExt)) {
++          return resolveRelative(effectiveSrc, _candExt) + _rawA;
++        }
++      }
++      if (
++        isFolderPath(targetSlug) &&
++        (opts.allSlugs.includes(_cand + "/index") ||
++          opts.allSlugs.some((s) => s.startsWith(_cand + "/")))
++      ) {
++        return joinSegments(pathToRoot(effectiveSrc), _cand) + "/" + targetAnchor;
++      }
 +    }
      if (opts.strategy === "shortest") {
        const isMultiSegment = targetCanonical.includes("/");
        const isFolderTarget = isFolderPath(targetSlug);
-@@ -258,7 +265,7 @@ function _addRelativeToStart(s) {
+@@ -258,7 +280,7 @@ function _addRelativeToStart(s) {
    if (s === "") {
      s = ".";
    }
