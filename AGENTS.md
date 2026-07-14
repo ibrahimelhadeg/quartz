@@ -39,7 +39,7 @@ two-view spec model (no README §3 / openspec governance applies here).
 `quartz.config.default.yaml` (upstream defaults). Each consumer provides its
 own `quartz.config.yaml` (the v5 loader prefers it) — dotfiles materializes
 `~/.system/setup/scripts/quartz/quartz.config.yaml` into the fork via its
-`build-quartz-site.fish`, and gitignores the materialized copy here. Only the
+`.system/site/build-site.fish`, and gitignores the materialized copy here. Only the
 CODE patches above (glob / plugins / scss) are fork-level; site identity,
 ignore rules, and plugin wiring are NOT — keep `quartz.config.default.yaml`
 generic so the fork stays reusable by other projects.
